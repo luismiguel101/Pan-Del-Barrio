@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="es" class="h-full bg-[#F8E7D8]">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="/logo.png" />
+    <link rel="apple-touch-icon" href="/logo.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="theme-color" content="#5C2C16" />
+    <meta name="description" content="Sistema de gestión y control de tareas operativas diarias para panadería y salón - Pan del Barrio" />
+    <link rel="manifest" href="/manifest.json" />
+    
+    <!-- Google Fonts: Outfit & Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+    
+    <title>Pan del Barrio | Control de Tareas Diarias</title>
+  </head>
+  <body class="h-full font-sans antialiased text-stone-900 bg-[#F8E7D8] selection:bg-amber-200 selection:text-amber-950">
+    <div id="root" class="h-full"></div>
+    <script type="module" src="/src/main.jsx"></script>
+    <script>
+      if ('serviceWorker' in navigator && window.location.protocol === 'https:') {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW reg error:', err));
+        });
+      }
+    </script>
+  </body>
+</html>

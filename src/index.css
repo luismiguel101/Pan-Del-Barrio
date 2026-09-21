@@ -1,0 +1,62 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background-color: #F8E7D8;
+    color: #3D2214;
+  }
+  h1, h2, h3, h4, .font-heading {
+    font-family: 'Outfit', 'Inter', system-ui, sans-serif;
+  }
+}
+
+/* Custom animations & soft glow utilities */
+@keyframes softPulseRed {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 12px 2px rgba(239, 68, 68, 0.35);
+  }
+}
+
+@keyframes softGlowGreen {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.15);
+  }
+  50% {
+    box-shadow: 0 0 12px 2px rgba(16, 185, 129, 0.3);
+  }
+}
+
+.pulse-red-glow {
+  animation: softPulseRed 2.5s infinite ease-in-out;
+}
+
+.glow-green-subtle {
+  animation: softGlowGreen 3s infinite ease-in-out;
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #F8E7D8;
+}
+::-webkit-scrollbar-thumb {
+  background: #E8CFB8;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #D7B89C;
+}
+
+/* Glassmorphism */
+.glass-panel {
+  background: rgba(253, 246, 237, 0.9);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}

@@ -1,0 +1,22 @@
+{
+  "short_name": "Pan del Barrio",
+  "name": "Pan del Barrio - Control de Tareas Diarias",
+  "description": "Sistema de gestión y control de tareas operativas diarias para panadería y salón.",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "/icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#FAF7F2",
+  "theme_color": "#D97706",
+  "display": "standalone",
+  "orientation": "portrait"
+}

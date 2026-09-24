@@ -6,10 +6,10 @@ import {
   Check, 
   Clock, 
   Search, 
-  RotateCcw,
   CheckCircle2,
-  ListCheck,
-  ChevronRight
+  Receipt,
+  Wheat,
+  UserCheck
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
@@ -19,26 +19,15 @@ export function EmployeeView({
   onSelectShift, 
   onToggleTask
 }) {
-  const [activeStage, setActiveStage] = useState('Todas'); // 'Todas' | 'Apertura' | 'Medio Turno' | 'Cambio de Turno' | 'Cierre'
+  const [activeRoleFilter, setActiveRoleFilter] = useState('Todas'); // 'Todas' | 'Cajera' | 'Despacho'
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Define operational stages depending on shift
-  const stagesManana = [
-    { id: 'Todas', name: 'Todas las Tareas', icon: Sparkles, color: 'from-[#3D2214] to-[#5C2C16]' },
-    { id: 'Apertura', name: 'Apertura Mañana', icon: Sunrise, color: 'from-amber-600 to-amber-500' },
-    { id: 'Medio Turno', name: 'Medio Turno', icon: Clock, color: 'from-yellow-600 to-amber-500' },
-    { id: 'Cambio de Turno', name: 'Cambio Turno', icon: RotateCcw, color: 'from-orange-600 to-amber-600' },
-    { id: 'Cierre', name: 'Cierre Turno Mañana', icon: Sunset, color: 'from-rose-700 to-rose-600' }
+  // Define only 2 main roles plus "Todas"
+  const roleButtons = [
+    { id: 'Todas', name: 'Todas las Labores', icon: Sparkles, color: 'from-[#3D2214] to-[#5C2C16]' },
+    { id: 'Cajera', name: 'Labores de Cajera', subtitle: 'Caja, Atención y Café', icon: Receipt, color: 'from-amber-700 to-amber-600' },
+    { id: 'Despacho', name: 'Labores de Despacho', subtitle: 'Mostrador, Panes y Salón', icon: Wheat, color: 'from-orange-700 to-amber-600' }
   ];
-
-  const stagesTarde = [
-    { id: 'Todas', name: 'Todas las Tareas', icon: Sparkles, color: 'from-[#3D2214] to-[#5C2C16]' },
-    { id: 'Apertura', name: 'Apertura Tarde', icon: Sunrise, color: 'from-orange-600 to-amber-500' },
-    { id: 'Cambio de Turno', name: 'Cambio de Turno', icon: RotateCcw, color: 'from-amber-600 to-orange-600' },
-    { id: 'Cierre', name: 'Cierre Turno Tarde', icon: Sunset, color: 'from-rose-800 to-rose-600' }
-  ];
-
-  const currentStagesList = selectedShift === 'tarde' ? stagesTarde : stagesManana;
 
   // Trigger celebration confetti when completing tasks
   const handleTaskClick = (taskId, currentStatus) => {
@@ -58,14 +47,14 @@ export function EmployeeView({
     }
   };
 
-  // Filter tasks by current shift, active stage, and search query
+  // Filter tasks by current shift, active role filter, and search query
   const filteredTasks = tasks.filter(task => {
     const matchesShift = selectedShift === 'todos' || task.shift === selectedShift;
-    const matchesStage = activeStage === 'Todas' || task.category === activeStage;
+    const matchesRole = activeRoleFilter === 'Todas' || task.category === activeRoleFilter;
     const matchesQuery = 
       task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (task.description && task.description.toLowerCase().includes(searchQuery.toLowerCase()));
-    return matchesShift && matchesStage && matchesQuery;
+    return matchesShift && matchesRole && matchesQuery;
   });
 
   return (
@@ -76,7 +65,7 @@ export function EmployeeView({
         <button
           onClick={() => {
             onSelectShift('manana');
-            setActiveStage('Todas');
+            setActiveRoleFilter('Todas');
           }}
           className={`flex items-center justify-center gap-2 py-3.5 px-3 rounded-2xl font-heading font-extrabold text-xs sm:text-sm transition-all duration-200 ${
             selectedShift === 'manana'
@@ -91,7 +80,7 @@ export function EmployeeView({
         <button
           onClick={() => {
             onSelectShift('tarde');
-            setActiveStage('Todas');
+            setActiveRoleFilter('Todas');
           }}
           className={`flex items-center justify-center gap-2 py-3.5 px-3 rounded-2xl font-heading font-extrabold text-xs sm:text-sm transition-all duration-200 ${
             selectedShift === 'tarde'
@@ -106,7 +95,7 @@ export function EmployeeView({
         <button
           onClick={() => {
             onSelectShift('todos');
-            setActiveStage('Todas');
+            setActiveRoleFilter('Todas');
           }}
           className={`flex items-center justify-center gap-2 py-3.5 px-3 rounded-2xl font-heading font-extrabold text-xs sm:text-sm transition-all duration-200 ${
             selectedShift === 'todos'
@@ -119,77 +108,82 @@ export function EmployeeView({
         </button>
       </div>
 
-      {/* Visual & Dynamic Operational Stage Tab Buttons */}
+      {/* Visual & Dynamic Role Buttons: CAJERA vs DESPACHO */}
       <div className="space-y-2">
         <div className="flex items-center justify-between px-1 text-xs font-bold text-stone-700">
           <span className="flex items-center gap-1.5 uppercase tracking-wider text-amber-950 font-extrabold">
-            <ListCheck className="w-4 h-4 text-amber-700" />
-            Etapas del {selectedShift === 'tarde' ? 'Turno Tarde' : 'Turno Mañana'}
+            <UserCheck className="w-4 h-4 text-amber-700" />
+            Selección de Puesto / Rol ({selectedShift === 'tarde' ? 'Turno Tarde' : 'Turno Mañana'})
           </span>
           <span className="text-stone-500 font-medium hidden sm:inline">
-            Selecciona una etapa para enfocar sus tareas
+            Toca un puesto para ver solo sus tareas asignadas
           </span>
         </div>
 
-        {/* Dynamic Buttons Bar */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2.5">
-          {currentStagesList.map((stage) => {
-            const Icon = stage.icon;
-            const stageTasks = tasks.filter(t => 
+        {/* 2 Main Role Buttons + Todas */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {roleButtons.map((role) => {
+            const Icon = role.icon;
+            const roleTasks = tasks.filter(t => 
               (selectedShift === 'todos' || t.shift === selectedShift) &&
-              (stage.id === 'Todas' || t.category === stage.id)
+              (role.id === 'Todas' || t.category === role.id)
             );
-            const completedInStage = stageTasks.filter(t => t.status === 'completada').length;
-            const totalInStage = stageTasks.length;
-            const isFullyDone = totalInStage > 0 && completedInStage === totalInStage;
-            const isActive = activeStage === stage.id;
+            const completedInRole = roleTasks.filter(t => t.status === 'completada').length;
+            const totalInRole = roleTasks.length;
+            const isFullyDone = totalInRole > 0 && completedInRole === totalInRole;
+            const isActive = activeRoleFilter === role.id;
 
             return (
               <button
-                key={stage.id}
-                onClick={() => setActiveStage(stage.id)}
-                className={`relative group flex flex-col justify-between p-3.5 rounded-2xl border-2 transition-all duration-200 text-left cursor-pointer overflow-hidden ${
+                key={role.id}
+                onClick={() => setActiveRoleFilter(role.id)}
+                className={`relative group flex flex-col justify-between p-4 rounded-3xl border-2 transition-all duration-200 text-left cursor-pointer overflow-hidden ${
                   isActive
-                    ? 'bg-gradient-to-br ' + stage.color + ' text-white border-stone-900 shadow-md scale-[1.03] ring-2 ring-amber-400/30'
-                    : 'bg-white/90 text-stone-800 border-amber-200/90 hover:bg-amber-100/50 hover:border-amber-300'
+                    ? 'bg-gradient-to-br ' + role.color + ' text-white border-stone-900 shadow-md scale-[1.02] ring-2 ring-amber-400/30'
+                    : 'bg-white/95 text-stone-800 border-amber-200/90 hover:bg-amber-100/50 hover:border-amber-300'
                 }`}
               >
                 {/* Header info */}
-                <div className="flex items-center justify-between w-full mb-2">
-                  <div className={`p-2 rounded-xl flex items-center justify-center ${
-                    isActive ? 'bg-white/20 text-white' : 'bg-amber-100 text-amber-900'
+                <div className="flex items-center justify-between w-full mb-3">
+                  <div className={`p-2.5 rounded-2xl flex items-center justify-center ${
+                    isActive ? 'bg-white/20 text-white' : 'bg-amber-100 text-amber-950'
                   }`}>
-                    <Icon className="w-4 h-4" />
+                    <Icon className="w-5 h-5" />
                   </div>
 
-                  <span className={`text-[11px] font-extrabold px-2 py-0.5 rounded-full border ${
+                  <span className={`text-xs font-extrabold px-3 py-1 rounded-full border ${
                     isFullyDone
                       ? 'bg-emerald-500 text-white border-emerald-600'
                       : isActive
                       ? 'bg-white/20 text-white border-white/30'
                       : 'bg-amber-100 text-amber-950 border-amber-200'
                   }`}>
-                    {completedInStage}/{totalInStage}
+                    {completedInRole}/{totalInRole} Completadas
                   </span>
                 </div>
 
-                {/* Stage Name */}
-                <div className="space-y-1">
-                  <span className={`text-xs sm:text-sm font-extrabold font-heading leading-tight block ${
+                {/* Role Name */}
+                <div className="space-y-1.5">
+                  <span className={`text-base font-extrabold font-heading block ${
                     isActive ? 'text-white' : 'text-stone-900'
                   }`}>
-                    {stage.name}
+                    {role.name}
                   </span>
+                  {role.subtitle && (
+                    <span className={`text-xs block ${isActive ? 'text-white/80' : 'text-stone-500'}`}>
+                      {role.subtitle}
+                    </span>
+                  )}
 
                   {/* Micro Progress Bar inside Button */}
-                  <div className={`w-full h-1.5 rounded-full overflow-hidden ${
+                  <div className={`w-full h-2 rounded-full overflow-hidden mt-2 ${
                     isActive ? 'bg-black/20' : 'bg-stone-200'
                   }`}>
                     <div 
                       className={`h-full transition-all duration-500 rounded-full ${
                         isFullyDone ? 'bg-emerald-400' : isActive ? 'bg-amber-300' : 'bg-amber-600'
                       }`}
-                      style={{ width: `${totalInStage > 0 ? (completedInStage / totalInStage) * 100 : 0}%` }}
+                      style={{ width: `${totalInRole > 0 ? (completedInRole / totalInRole) * 100 : 0}%` }}
                     />
                   </div>
                 </div>
@@ -204,7 +198,7 @@ export function EmployeeView({
       <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
         <div className="flex items-center gap-2 text-xs font-bold text-stone-700">
           <span className="bg-amber-200/80 text-amber-950 px-3 py-1 rounded-full border border-amber-300">
-            {activeStage === 'Todas' ? 'Todas las Etapas' : activeStage} ({filteredTasks.length} Tareas)
+            {activeRoleFilter === 'Todas' ? 'Todas las Labores' : `Puesto: ${activeRoleFilter}`} ({filteredTasks.length} Tareas)
           </span>
         </div>
 
@@ -229,10 +223,10 @@ export function EmployeeView({
               <CheckCircle2 className="w-6 h-6" />
             </div>
             <p className="font-bold text-stone-800 text-sm">
-              No hay tareas registradas en esta etapa
+              No hay tareas registradas para este filtro
             </p>
             <p className="text-xs text-stone-500">
-              Prueba seleccionando otra etapa operativa en los botones superiores.
+              Prueba seleccionando el botón "CAJERA" o "DESPACHO" en los botones superiores.
             </p>
           </div>
         ) : (
@@ -270,10 +264,14 @@ export function EmployeeView({
                     {/* Task Details */}
                     <div className="flex-1 min-w-0 space-y-1.5">
                       
-                      {/* Category & Status Badges */}
+                      {/* Category Badge (Cajera vs Despacho) & Status Badges */}
                       <div className="flex items-center justify-between gap-2">
-                        <span className="inline-flex items-center gap-1 text-[11px] font-bold text-stone-700 bg-white/90 px-2.5 py-0.5 rounded-full border border-stone-200">
-                          {task.category}
+                        <span className={`inline-flex items-center gap-1 text-[11px] font-extrabold px-2.5 py-0.5 rounded-full border ${
+                          task.category === 'Cajera'
+                            ? 'bg-amber-100 text-amber-900 border-amber-300'
+                            : 'bg-orange-100 text-orange-900 border-orange-300'
+                        }`}>
+                          {task.category === 'Cajera' ? '💳 Cajera' : '🥖 Despacho'}
                         </span>
 
                         {/* Strictly 2 Visual States Badge */}

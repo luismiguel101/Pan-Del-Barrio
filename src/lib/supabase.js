@@ -21,14 +21,14 @@ export const getTodayString = () => {
 };
 
 // Storage keys for local fallback engine
-const LOCAL_TASKS_KEY = 'pan_del_barrio_tasks_v4';
-const LOCAL_HISTORY_KEY = 'pan_del_barrio_history_v4';
+const LOCAL_TASKS_KEY = 'pan_del_barrio_tasks_v5';
+const LOCAL_HISTORY_KEY = 'pan_del_barrio_history_v5';
 const LAST_RESET_DATE_KEY = 'pan_del_barrio_last_reset_tag';
 
 // Initial local storage setup
 export const initLocalStorage = () => {
   const existing = localStorage.getItem(LOCAL_TASKS_KEY);
-  if (!existing || JSON.parse(existing).length < 20) {
+  if (!existing || JSON.parse(existing).length < 20 || !JSON.parse(existing)[0].category.includes('Cajera')) {
     localStorage.setItem(LOCAL_TASKS_KEY, JSON.stringify(INITIAL_TASKS));
   }
 
@@ -39,12 +39,12 @@ export const initLocalStorage = () => {
       {
         id: 'hist-1',
         snapshot_date: yesterday.toISOString().split('T')[0],
-        total_tasks: 82,
-        completed_tasks: 78,
-        pending_tasks: 4,
-        completion_percentage: 95,
+        total_tasks: 75,
+        completed_tasks: 72,
+        pending_tasks: 3,
+        completion_percentage: 96,
         morning_completion_pct: 98,
-        afternoon_completion_pct: 92,
+        afternoon_completion_pct: 94,
         summary_notes: 'Jornada oficial completada a las 22:00h.'
       }
     ];
@@ -91,7 +91,7 @@ export const fetchTasks = async () => {
             id: t.id,
             title: t.title,
             description: t.description || '',
-            category: t.category || 'Apertura',
+            category: t.category || 'Cajera',
             shift: t.shift_id,
             order: t.display_order,
             active: t.active,
@@ -243,10 +243,8 @@ export const executeDailyReset = async (notes = 'Cierre de jornada manual a las 
 
   if (supabase) {
     try {
-      // 1. Call stored procedure in Supabase
       await supabase.rpc('fn_reset_daily_tasks', { target_date: today });
 
-      // 2. Force reset all daily task logs for today to 'pendiente'
       await supabase
         .from('daily_task_logs')
         .update({

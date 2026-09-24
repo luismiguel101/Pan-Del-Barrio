@@ -8,11 +8,12 @@ import {
   RotateCcw, 
   Sunrise, 
   Sunset, 
-  Layers, 
-  Sparkles,
-  Clock,
-  ShieldCheck,
-  Search,
+  Sparkles, 
+  Clock, 
+  ShieldCheck, 
+  Search, 
+  Receipt,
+  Wheat,
   ListCheck
 } from 'lucide-react';
 
@@ -27,7 +28,7 @@ export function AdminDashboard({
   onLogoutAdmin
 }) {
   const [activeShiftFilter, setActiveShiftFilter] = useState('manana'); // 'manana' | 'tarde' | 'todos'
-  const [activeStageFilter, setActiveStageFilter] = useState('Todas'); // 'Todas' | 'Apertura' | 'Medio Turno' | 'Cambio de Turno' | 'Cierre'
+  const [activeRoleFilter, setActiveRoleFilter] = useState('Todas'); // 'Todas' | 'Cajera' | 'Despacho'
   const [searchQuery, setSearchQuery] = useState('');
 
   // Metrics
@@ -45,30 +46,18 @@ export function AdminDashboard({
   const tardeCompleted = tardeTasks.filter(t => t.status === 'completada').length;
   const tardePct = tardeTasks.length > 0 ? Math.round((tardeCompleted / tardeTasks.length) * 100) : 0;
 
-  // Stages lists per shift
-  const stagesManana = [
-    { id: 'Todas', name: 'Todas', icon: Sparkles },
-    { id: 'Apertura', name: 'Apertura Mañana', icon: Sunrise },
-    { id: 'Medio Turno', name: 'Medio Turno', icon: Clock },
-    { id: 'Cambio de Turno', name: 'Cambio Turno', icon: RotateCcw },
-    { id: 'Cierre', name: 'Cierre Mañana', icon: Sunset }
+  const rolesList = [
+    { id: 'Todas', name: 'Todas las Labores', icon: Sparkles },
+    { id: 'Cajera', name: 'Cajera 💳', icon: Receipt },
+    { id: 'Despacho', name: 'Despacho 🥖', icon: Wheat }
   ];
-
-  const stagesTarde = [
-    { id: 'Todas', name: 'Todas', icon: Sparkles },
-    { id: 'Apertura', name: 'Apertura Tarde', icon: Sunrise },
-    { id: 'Cambio de Turno', name: 'Cambio Turno', icon: RotateCcw },
-    { id: 'Cierre', name: 'Cierre Tarde', icon: Sunset }
-  ];
-
-  const currentStages = activeShiftFilter === 'tarde' ? stagesTarde : stagesManana;
 
   // Filtered tasks
   const displayedTasks = tasks.filter(task => {
     const matchesShift = activeShiftFilter === 'todos' || task.shift === activeShiftFilter;
-    const matchesStage = activeStageFilter === 'Todas' || task.category === activeStageFilter;
+    const matchesRole = activeRoleFilter === 'Todas' || task.category === activeRoleFilter;
     const matchesQuery = task.title.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesShift && matchesStage && matchesQuery;
+    return matchesShift && matchesRole && matchesQuery;
   });
 
   return (
@@ -87,10 +76,10 @@ export function AdminDashboard({
               </span>
             </div>
             <h2 className="text-2xl sm:text-3xl font-bold font-heading tracking-tight text-amber-100">
-              Gestión Operativa de Pan del Barrio
+              Gestión de Labores: Cajera y Despacho
             </h2>
             <p className="text-xs sm:text-sm text-stone-300 max-w-xl">
-              Crea y edita tareas por etapas. Selecciona las pestañas para organizar las tareas por turno y momentos de la jornada.
+              Administra las tareas asignadas a la Cajera y al personal de Despacho para los turnos Mañana y Tarde.
             </p>
           </div>
 
@@ -188,7 +177,7 @@ export function AdminDashboard({
 
       </div>
 
-      {/* Turno Selector & Stage Buttons */}
+      {/* Turno Selector & Role Buttons */}
       <div className="space-y-4">
         
         {/* Shift selector */}
@@ -196,7 +185,7 @@ export function AdminDashboard({
           <button
             onClick={() => {
               setActiveShiftFilter('manana');
-              setActiveStageFilter('Todas');
+              setActiveRoleFilter('Todas');
             }}
             className={`py-2.5 px-3 rounded-xl font-bold text-xs sm:text-sm transition-all ${
               activeShiftFilter === 'manana'
@@ -209,7 +198,7 @@ export function AdminDashboard({
           <button
             onClick={() => {
               setActiveShiftFilter('tarde');
-              setActiveStageFilter('Todas');
+              setActiveRoleFilter('Todas');
             }}
             className={`py-2.5 px-3 rounded-xl font-bold text-xs sm:text-sm transition-all ${
               activeShiftFilter === 'tarde'
@@ -222,7 +211,7 @@ export function AdminDashboard({
           <button
             onClick={() => {
               setActiveShiftFilter('todos');
-              setActiveStageFilter('Todas');
+              setActiveRoleFilter('Todas');
             }}
             className={`py-2.5 px-3 rounded-xl font-bold text-xs sm:text-sm transition-all ${
               activeShiftFilter === 'todos'
@@ -234,32 +223,34 @@ export function AdminDashboard({
           </button>
         </div>
 
-        {/* Visual Stage Buttons */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-1">
-          {currentStages.map((stage) => {
-            const Icon = stage.icon;
-            const isSelected = activeStageFilter === stage.id;
-            const stageTasksCount = tasks.filter(t => 
+        {/* Visual 2 Role Buttons */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {rolesList.map((role) => {
+            const Icon = role.icon;
+            const isSelected = activeRoleFilter === role.id;
+            const roleTasksCount = tasks.filter(t => 
               (activeShiftFilter === 'todos' || t.shift === activeShiftFilter) &&
-              (stage.id === 'Todas' || t.category === stage.id)
+              (role.id === 'Todas' || t.category === role.id)
             ).length;
 
             return (
               <button
-                key={stage.id}
-                onClick={() => setActiveStageFilter(stage.id)}
-                className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl font-bold text-xs transition-all whitespace-nowrap border cursor-pointer ${
+                key={role.id}
+                onClick={() => setActiveRoleFilter(role.id)}
+                className={`flex items-center justify-between p-3.5 rounded-2xl font-bold text-xs sm:text-sm transition-all border cursor-pointer ${
                   isSelected
-                    ? 'bg-amber-600 text-white border-amber-700 shadow-md scale-105'
+                    ? 'bg-amber-700 text-white border-amber-800 shadow-md scale-[1.02]'
                     : 'bg-white/90 text-stone-800 border-amber-200 hover:bg-amber-100/60'
                 }`}
               >
-                <Icon className="w-4 h-4" />
-                <span>{stage.name}</span>
-                <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
+                <div className="flex items-center gap-2">
+                  <Icon className="w-4 h-4" />
+                  <span>{role.name}</span>
+                </div>
+                <span className={`px-2.5 py-0.5 rounded-full text-xs font-extrabold ${
                   isSelected ? 'bg-white/20 text-white' : 'bg-amber-100 text-amber-950'
                 }`}>
-                  {stageTasksCount}
+                  {roleTasksCount}
                 </span>
               </button>
             );
@@ -276,7 +267,7 @@ export function AdminDashboard({
           
           <div className="flex items-center gap-2 text-xs font-extrabold text-stone-800">
             <ListCheck className="w-4 h-4 text-amber-700" />
-            <span>Mostrando: {activeStageFilter} ({displayedTasks.length} Tareas)</span>
+            <span>Filtro Actual: {activeRoleFilter === 'Todas' ? 'Todas las Labores' : `Puesto ${activeRoleFilter}`} ({displayedTasks.length} Tareas)</span>
           </div>
 
           {/* Search Input */}
@@ -301,7 +292,7 @@ export function AdminDashboard({
                 <th className="py-3 px-4">Estado</th>
                 <th className="py-3 px-4">Tarea / Descripción</th>
                 <th className="py-3 px-4">Turno</th>
-                <th className="py-3 px-4">Etapa Operativa</th>
+                <th className="py-3 px-4">Puesto / Rol</th>
                 <th className="py-3 px-4 text-right">Acciones</th>
               </tr>
             </thead>
@@ -373,10 +364,14 @@ export function AdminDashboard({
                         </span>
                       </td>
 
-                      {/* Etapa Operativa */}
+                      {/* Puesto / Rol */}
                       <td className="py-3.5 px-4 whitespace-nowrap">
-                        <span className="bg-stone-100 text-stone-800 px-2.5 py-0.5 rounded-md text-[11px] font-bold border border-stone-200">
-                          {task.category}
+                        <span className={`px-2.5 py-0.5 rounded-md text-[11px] font-bold border ${
+                          task.category === 'Cajera'
+                            ? 'bg-amber-100 text-amber-900 border-amber-300'
+                            : 'bg-orange-100 text-orange-900 border-orange-300'
+                        }`}>
+                          {task.category === 'Cajera' ? '💳 Cajera' : '🥖 Despacho'}
                         </span>
                       </td>
 

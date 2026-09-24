@@ -4,7 +4,7 @@ import { X, Save, Plus } from 'lucide-react';
 export function TaskModal({ isOpen, onClose, onSave, taskToEdit = null }) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [category, setCategory] = useState('Apertura');
+  const [category, setCategory] = useState('Cajera');
   const [shift, setShift] = useState('manana');
   const [order, setOrder] = useState(1);
 
@@ -12,13 +12,13 @@ export function TaskModal({ isOpen, onClose, onSave, taskToEdit = null }) {
     if (taskToEdit) {
       setTitle(taskToEdit.title || '');
       setDescription(taskToEdit.description || '');
-      setCategory(taskToEdit.category || 'Apertura');
+      setCategory(taskToEdit.category || 'Cajera');
       setShift(taskToEdit.shift || 'manana');
       setOrder(taskToEdit.order || 1);
     } else {
       setTitle('');
       setDescription('');
-      setCategory('Apertura');
+      setCategory('Cajera');
       setShift('manana');
       setOrder(1);
     }
@@ -53,7 +53,7 @@ export function TaskModal({ isOpen, onClose, onSave, taskToEdit = null }) {
               {taskToEdit ? <Save className="w-4 h-4" /> : <Plus className="w-5 h-5" />}
             </div>
             <h3 className="text-lg font-bold font-heading text-stone-900">
-              {taskToEdit ? 'Editar Tarea Checklist' : 'Nueva Tarea Pan del Barrio'}
+              {taskToEdit ? 'Editar Tarea de Puesto' : 'Nueva Tarea Pan del Barrio'}
             </h3>
           </div>
           <button
@@ -75,7 +75,7 @@ export function TaskModal({ isOpen, onClose, onSave, taskToEdit = null }) {
             <input
               type="text"
               required
-              placeholder="Ej. Limpieza de horno, tostadora, microondas..."
+              placeholder="Ej. Revisión de temperatura de equipos..."
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               className="w-full px-4 py-2.5 bg-white border border-amber-300 rounded-xl text-xs sm:text-sm font-semibold text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500"
@@ -96,7 +96,7 @@ export function TaskModal({ isOpen, onClose, onSave, taskToEdit = null }) {
             />
           </div>
 
-          {/* Turno y Categoría */}
+          {/* Turno y Puesto */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             
             {/* Turno */}
@@ -114,20 +114,18 @@ export function TaskModal({ isOpen, onClose, onSave, taskToEdit = null }) {
               </select>
             </div>
 
-            {/* Etapa / Categoría */}
+            {/* Puesto / Rol */}
             <div className="space-y-1">
               <label className="text-xs font-extrabold uppercase tracking-wider text-stone-700">
-                Etapa Operativa
+                Puesto Asignado
               </label>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
                 className="w-full px-4 py-2.5 bg-white border border-amber-300 rounded-xl text-xs sm:text-sm font-semibold text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500"
               >
-                <option value="Apertura">Apertura 🌅</option>
-                <option value="Medio Turno">Medio Turno ⏰</option>
-                <option value="Cambio de Turno">Cambio de Turno 🔄</option>
-                <option value="Cierre">Cierre 🌙</option>
+                <option value="Cajera">Cajera 💳</option>
+                <option value="Despacho">Despacho 🥖</option>
               </select>
             </div>
 

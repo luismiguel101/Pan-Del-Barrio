@@ -21,14 +21,14 @@ export const getTodayString = () => {
 };
 
 // Storage keys for local fallback engine
-const LOCAL_TASKS_KEY = 'pan_del_barrio_tasks_v7';
-const LOCAL_HISTORY_KEY = 'pan_del_barrio_history_v7';
+const LOCAL_TASKS_KEY = 'pan_del_barrio_tasks_v8';
+const LOCAL_HISTORY_KEY = 'pan_del_barrio_history_v8';
 const LAST_RESET_DATE_KEY = 'pan_del_barrio_last_reset_tag';
 
 // Initial local storage setup
 export const initLocalStorage = () => {
   const existing = localStorage.getItem(LOCAL_TASKS_KEY);
-  if (!existing || JSON.parse(existing).length === 0 || !JSON.parse(existing)[0].category || !['Cajera', 'Despacho'].includes(JSON.parse(existing)[0].category)) {
+  if (!existing || JSON.parse(existing).length !== INITIAL_TASKS.length) {
     localStorage.setItem(LOCAL_TASKS_KEY, JSON.stringify(INITIAL_TASKS));
   }
 
@@ -198,7 +198,7 @@ export const toggleTaskStatus = async (taskId, currentStatus) => {
   return { success: true, newStatus, tasks: updated };
 };
 
-// CREATE / EDIT TASK (Permite al Admin crear tareas para Cajera o Despacho en Mañana o Tarde)
+// CREATE / EDIT TASK
 export const saveTask = async (taskData) => {
   if (supabase) {
     try {

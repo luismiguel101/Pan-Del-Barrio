@@ -8,7 +8,6 @@ import {
   RotateCcw, 
   Sunrise, 
   Sunset, 
-  Sparkles, 
   Clock, 
   ShieldCheck, 
   Search, 
@@ -28,7 +27,7 @@ export function AdminDashboard({
   onLogoutAdmin
 }) {
   const [activeShiftFilter, setActiveShiftFilter] = useState('manana'); // 'manana' | 'tarde' | 'todos'
-  const [activeRoleFilter, setActiveRoleFilter] = useState('Todas'); // 'Todas' | 'Cajera' | 'Despacho'
+  const [activeRoleFilter, setActiveRoleFilter] = useState('Cajera'); // 'Cajera' | 'Despacho'
   const [searchQuery, setSearchQuery] = useState('');
 
   // Metrics
@@ -46,16 +45,16 @@ export function AdminDashboard({
   const tardeCompleted = tardeTasks.filter(t => t.status === 'completada').length;
   const tardePct = tardeTasks.length > 0 ? Math.round((tardeCompleted / tardeTasks.length) * 100) : 0;
 
+  // Strictly 2 role buttons
   const rolesList = [
-    { id: 'Todas', name: 'Todas las Labores', icon: Sparkles },
-    { id: 'Cajera', name: 'Cajera 💳', icon: Receipt },
-    { id: 'Despacho', name: 'Despacho 🥖', icon: Wheat }
+    { id: 'Cajera', name: 'Labores de Cajera 💳', icon: Receipt },
+    { id: 'Despacho', name: 'Labores de Despacho 🥖', icon: Wheat }
   ];
 
   // Filtered tasks
   const displayedTasks = tasks.filter(task => {
     const matchesShift = activeShiftFilter === 'todos' || task.shift === activeShiftFilter;
-    const matchesRole = activeRoleFilter === 'Todas' || task.category === activeRoleFilter;
+    const matchesRole = task.category === activeRoleFilter;
     const matchesQuery = task.title.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesShift && matchesRole && matchesQuery;
   });
@@ -76,10 +75,10 @@ export function AdminDashboard({
               </span>
             </div>
             <h2 className="text-2xl sm:text-3xl font-bold font-heading tracking-tight text-amber-100">
-              Gestión de Labores: Cajera y Despacho
+              Gestión de Puestos: Cajera y Despacho
             </h2>
             <p className="text-xs sm:text-sm text-stone-300 max-w-xl">
-              Administra las tareas asignadas a la Cajera y al personal de Despacho para los turnos Mañana y Tarde.
+              Administra las labores asignadas a Cajera y Despacho para los turnos Mañana y Tarde.
             </p>
           </div>
 
@@ -111,7 +110,7 @@ export function AdminDashboard({
         <div className="bg-white/90 p-5 rounded-3xl border border-amber-200/80 shadow-xs space-y-2">
           <div className="flex items-center justify-between text-xs font-bold text-stone-500">
             <span>Cumplimiento Global</span>
-            <Sparkles className="w-4 h-4 text-amber-500" />
+            <Receipt className="w-4 h-4 text-amber-500" />
           </div>
           <div className="flex items-baseline justify-between">
             <span className="text-3xl font-extrabold font-heading text-stone-900">{globalPct}%</span>
@@ -183,10 +182,7 @@ export function AdminDashboard({
         {/* Shift selector */}
         <div className="grid grid-cols-3 gap-2 bg-[#EED8C5]/80 p-1.5 rounded-2xl border border-amber-300/40">
           <button
-            onClick={() => {
-              setActiveShiftFilter('manana');
-              setActiveRoleFilter('Todas');
-            }}
+            onClick={() => setActiveShiftFilter('manana')}
             className={`py-2.5 px-3 rounded-xl font-bold text-xs sm:text-sm transition-all ${
               activeShiftFilter === 'manana'
                 ? 'bg-amber-700 text-white shadow-xs'
@@ -196,10 +192,7 @@ export function AdminDashboard({
             Turno Mañana ({mananaTasks.length})
           </button>
           <button
-            onClick={() => {
-              setActiveShiftFilter('tarde');
-              setActiveRoleFilter('Todas');
-            }}
+            onClick={() => setActiveShiftFilter('tarde')}
             className={`py-2.5 px-3 rounded-xl font-bold text-xs sm:text-sm transition-all ${
               activeShiftFilter === 'tarde'
                 ? 'bg-orange-700 text-white shadow-xs'
@@ -209,10 +202,7 @@ export function AdminDashboard({
             Turno Tarde ({tardeTasks.length})
           </button>
           <button
-            onClick={() => {
-              setActiveShiftFilter('todos');
-              setActiveRoleFilter('Todas');
-            }}
+            onClick={() => setActiveShiftFilter('todos')}
             className={`py-2.5 px-3 rounded-xl font-bold text-xs sm:text-sm transition-all ${
               activeShiftFilter === 'todos'
                 ? 'bg-[#3D2214] text-amber-300 shadow-xs'
@@ -223,34 +213,34 @@ export function AdminDashboard({
           </button>
         </div>
 
-        {/* Visual 2 Role Buttons */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        {/* Visual STRICTLY 2 Role Buttons */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {rolesList.map((role) => {
             const Icon = role.icon;
             const isSelected = activeRoleFilter === role.id;
             const roleTasksCount = tasks.filter(t => 
               (activeShiftFilter === 'todos' || t.shift === activeShiftFilter) &&
-              (role.id === 'Todas' || t.category === role.id)
+              t.category === role.id
             ).length;
 
             return (
               <button
                 key={role.id}
                 onClick={() => setActiveRoleFilter(role.id)}
-                className={`flex items-center justify-between p-3.5 rounded-2xl font-bold text-xs sm:text-sm transition-all border cursor-pointer ${
+                className={`flex items-center justify-between p-4 rounded-3xl font-bold text-sm sm:text-base transition-all border cursor-pointer ${
                   isSelected
                     ? 'bg-amber-700 text-white border-amber-800 shadow-md scale-[1.02]'
                     : 'bg-white/90 text-stone-800 border-amber-200 hover:bg-amber-100/60'
                 }`}
               >
-                <div className="flex items-center gap-2">
-                  <Icon className="w-4 h-4" />
+                <div className="flex items-center gap-3">
+                  <Icon className="w-5 h-5" />
                   <span>{role.name}</span>
                 </div>
-                <span className={`px-2.5 py-0.5 rounded-full text-xs font-extrabold ${
+                <span className={`px-3 py-1 rounded-full text-xs font-extrabold ${
                   isSelected ? 'bg-white/20 text-white' : 'bg-amber-100 text-amber-950'
                 }`}>
-                  {roleTasksCount}
+                  {roleTasksCount} Labores
                 </span>
               </button>
             );
@@ -267,7 +257,7 @@ export function AdminDashboard({
           
           <div className="flex items-center gap-2 text-xs font-extrabold text-stone-800">
             <ListCheck className="w-4 h-4 text-amber-700" />
-            <span>Filtro Actual: {activeRoleFilter === 'Todas' ? 'Todas las Labores' : `Puesto ${activeRoleFilter}`} ({displayedTasks.length} Tareas)</span>
+            <span>Filtro Actual: Labores de {activeRoleFilter} ({displayedTasks.length} Tareas)</span>
           </div>
 
           {/* Search Input */}
@@ -300,7 +290,7 @@ export function AdminDashboard({
               {displayedTasks.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="py-8 text-center text-stone-400">
-                    No hay tareas registradas en esta vista.
+                    No hay tareas registradas para este filtro.
                   </td>
                 </tr>
               ) : (

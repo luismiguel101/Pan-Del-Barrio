@@ -19,12 +19,11 @@ export function EmployeeView({
   onSelectShift, 
   onToggleTask
 }) {
-  const [activeRoleFilter, setActiveRoleFilter] = useState('Todas'); // 'Todas' | 'Cajera' | 'Despacho'
+  const [activeRoleFilter, setActiveRoleFilter] = useState('Cajera'); // 'Cajera' | 'Despacho'
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Define only 2 main roles plus "Todas"
+  // Strictly ONLY 2 role buttons (No "Todas" button)
   const roleButtons = [
-    { id: 'Todas', name: 'Todas las Labores', icon: Sparkles, color: 'from-[#3D2214] to-[#5C2C16]' },
     { id: 'Cajera', name: 'Labores de Cajera', subtitle: 'Caja, Atención y Café', icon: Receipt, color: 'from-amber-700 to-amber-600' },
     { id: 'Despacho', name: 'Labores de Despacho', subtitle: 'Mostrador, Panes y Salón', icon: Wheat, color: 'from-orange-700 to-amber-600' }
   ];
@@ -37,7 +36,7 @@ export function EmployeeView({
       const currentCompleted = tasks.filter(t => t.status === 'completada').length;
       const totalTasks = tasks.length;
       
-      if (currentCompleted + 1 === totalTasks) {
+      if (currentCompleted + 1 === totalTasks && totalTasks > 0) {
         confetti({
           particleCount: 140,
           spread: 80,
@@ -47,10 +46,10 @@ export function EmployeeView({
     }
   };
 
-  // Filter tasks by current shift, active role filter, and search query
+  // Filter tasks by current shift, active role filter (Cajera or Despacho), and search query
   const filteredTasks = tasks.filter(task => {
     const matchesShift = selectedShift === 'todos' || task.shift === selectedShift;
-    const matchesRole = activeRoleFilter === 'Todas' || task.category === activeRoleFilter;
+    const matchesRole = task.category === activeRoleFilter;
     const matchesQuery = 
       task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (task.description && task.description.toLowerCase().includes(searchQuery.toLowerCase()));
@@ -63,10 +62,7 @@ export function EmployeeView({
       {/* Turno Switcher Tabs (Mañana vs Tarde vs Todos) */}
       <div className="grid grid-cols-3 gap-2 bg-[#EED8C5]/80 p-1.5 rounded-3xl border border-amber-300/40 shadow-xs">
         <button
-          onClick={() => {
-            onSelectShift('manana');
-            setActiveRoleFilter('Todas');
-          }}
+          onClick={() => onSelectShift('manana')}
           className={`flex items-center justify-center gap-2 py-3.5 px-3 rounded-2xl font-heading font-extrabold text-xs sm:text-sm transition-all duration-200 ${
             selectedShift === 'manana'
               ? 'bg-amber-700 text-white shadow-md shadow-amber-900/20 scale-[1.02]'
@@ -78,10 +74,7 @@ export function EmployeeView({
         </button>
 
         <button
-          onClick={() => {
-            onSelectShift('tarde');
-            setActiveRoleFilter('Todas');
-          }}
+          onClick={() => onSelectShift('tarde')}
           className={`flex items-center justify-center gap-2 py-3.5 px-3 rounded-2xl font-heading font-extrabold text-xs sm:text-sm transition-all duration-200 ${
             selectedShift === 'tarde'
               ? 'bg-orange-700 text-white shadow-md shadow-orange-900/20 scale-[1.02]'
@@ -93,10 +86,7 @@ export function EmployeeView({
         </button>
 
         <button
-          onClick={() => {
-            onSelectShift('todos');
-            setActiveRoleFilter('Todas');
-          }}
+          onClick={() => onSelectShift('todos')}
           className={`flex items-center justify-center gap-2 py-3.5 px-3 rounded-2xl font-heading font-extrabold text-xs sm:text-sm transition-all duration-200 ${
             selectedShift === 'todos'
               ? 'bg-[#3D2214] text-amber-300 shadow-md shadow-stone-900/10 scale-[1.02]'
@@ -108,25 +98,25 @@ export function EmployeeView({
         </button>
       </div>
 
-      {/* Visual & Dynamic Role Buttons: CAJERA vs DESPACHO */}
+      {/* Visual & Dynamic Role Buttons: ONLY CAJERA and DESPACHO */}
       <div className="space-y-2">
         <div className="flex items-center justify-between px-1 text-xs font-bold text-stone-700">
           <span className="flex items-center gap-1.5 uppercase tracking-wider text-amber-950 font-extrabold">
             <UserCheck className="w-4 h-4 text-amber-700" />
-            Selección de Puesto / Rol ({selectedShift === 'tarde' ? 'Turno Tarde' : 'Turno Mañana'})
+            Puesto de Trabajo ({selectedShift === 'tarde' ? 'Turno Tarde' : selectedShift === 'manana' ? 'Turno Mañana' : 'Todos los Turnos'})
           </span>
           <span className="text-stone-500 font-medium hidden sm:inline">
-            Toca un puesto para ver solo sus tareas asignadas
+            Selecciona Cajera o Despacho para ver sus labores
           </span>
         </div>
 
-        {/* 2 Main Role Buttons + Todas */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        {/* STRICTLY 2 Role Buttons */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {roleButtons.map((role) => {
             const Icon = role.icon;
             const roleTasks = tasks.filter(t => 
               (selectedShift === 'todos' || t.shift === selectedShift) &&
-              (role.id === 'Todas' || t.category === role.id)
+              t.category === role.id
             );
             const completedInRole = roleTasks.filter(t => t.status === 'completada').length;
             const totalInRole = roleTasks.length;
@@ -137,21 +127,21 @@ export function EmployeeView({
               <button
                 key={role.id}
                 onClick={() => setActiveRoleFilter(role.id)}
-                className={`relative group flex flex-col justify-between p-4 rounded-3xl border-2 transition-all duration-200 text-left cursor-pointer overflow-hidden ${
+                className={`relative group flex flex-col justify-between p-5 rounded-3xl border-2 transition-all duration-200 text-left cursor-pointer overflow-hidden ${
                   isActive
-                    ? 'bg-gradient-to-br ' + role.color + ' text-white border-stone-900 shadow-md scale-[1.02] ring-2 ring-amber-400/30'
+                    ? 'bg-gradient-to-br ' + role.color + ' text-white border-stone-900 shadow-lg scale-[1.02] ring-4 ring-amber-400/30'
                     : 'bg-white/95 text-stone-800 border-amber-200/90 hover:bg-amber-100/50 hover:border-amber-300'
                 }`}
               >
                 {/* Header info */}
                 <div className="flex items-center justify-between w-full mb-3">
-                  <div className={`p-2.5 rounded-2xl flex items-center justify-center ${
+                  <div className={`p-3 rounded-2xl flex items-center justify-center ${
                     isActive ? 'bg-white/20 text-white' : 'bg-amber-100 text-amber-950'
                   }`}>
-                    <Icon className="w-5 h-5" />
+                    <Icon className="w-6 h-6" />
                   </div>
 
-                  <span className={`text-xs font-extrabold px-3 py-1 rounded-full border ${
+                  <span className={`text-xs sm:text-sm font-extrabold px-3 py-1.5 rounded-full border ${
                     isFullyDone
                       ? 'bg-emerald-500 text-white border-emerald-600'
                       : isActive
@@ -164,19 +154,17 @@ export function EmployeeView({
 
                 {/* Role Name */}
                 <div className="space-y-1.5">
-                  <span className={`text-base font-extrabold font-heading block ${
+                  <span className={`text-lg sm:text-xl font-extrabold font-heading block ${
                     isActive ? 'text-white' : 'text-stone-900'
                   }`}>
                     {role.name}
                   </span>
-                  {role.subtitle && (
-                    <span className={`text-xs block ${isActive ? 'text-white/80' : 'text-stone-500'}`}>
-                      {role.subtitle}
-                    </span>
-                  )}
+                  <span className={`text-xs block ${isActive ? 'text-white/80' : 'text-stone-500'}`}>
+                    {role.subtitle}
+                  </span>
 
                   {/* Micro Progress Bar inside Button */}
-                  <div className={`w-full h-2 rounded-full overflow-hidden mt-2 ${
+                  <div className={`w-full h-2.5 rounded-full overflow-hidden mt-3 ${
                     isActive ? 'bg-black/20' : 'bg-stone-200'
                   }`}>
                     <div 
@@ -197,8 +185,8 @@ export function EmployeeView({
       {/* Search Bar & Counter Bar */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
         <div className="flex items-center gap-2 text-xs font-bold text-stone-700">
-          <span className="bg-amber-200/80 text-amber-950 px-3 py-1 rounded-full border border-amber-300">
-            {activeRoleFilter === 'Todas' ? 'Todas las Labores' : `Puesto: ${activeRoleFilter}`} ({filteredTasks.length} Tareas)
+          <span className="bg-amber-200/80 text-amber-950 px-3.5 py-1.5 rounded-full border border-amber-300 font-extrabold">
+            Puesto: {activeRoleFilter === 'Cajera' ? '💳 Cajera' : '🥖 Despacho'} ({filteredTasks.length} Tareas)
           </span>
         </div>
 
@@ -207,7 +195,7 @@ export function EmployeeView({
           <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400" />
           <input
             type="text"
-            placeholder="Buscar por nombre de tarea..."
+            placeholder={`Buscar labores de ${activeRoleFilter.toLowerCase()}...`}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-9 pr-4 py-2 bg-white/90 border border-amber-200 rounded-2xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-amber-500/30 shadow-xs"
@@ -223,10 +211,12 @@ export function EmployeeView({
               <CheckCircle2 className="w-6 h-6" />
             </div>
             <p className="font-bold text-stone-800 text-sm">
-              No hay tareas registradas para este filtro
+              No hay tareas registradas para {activeRoleFilter.toLowerCase()} en este turno
             </p>
             <p className="text-xs text-stone-500">
-              Prueba seleccionando el botón "CAJERA" o "DESPACHO" en los botones superiores.
+              {selectedShift === 'tarde' 
+                ? 'El turno tarde aún no tiene tareas asignadas. El administrador las agregará pronto.' 
+                : 'Selecciona el otro puesto o limpia el filtro de búsqueda.'}
             </p>
           </div>
         ) : (
@@ -264,7 +254,7 @@ export function EmployeeView({
                     {/* Task Details */}
                     <div className="flex-1 min-w-0 space-y-1.5">
                       
-                      {/* Category Badge (Cajera vs Despacho) & Status Badges */}
+                      {/* Category Badge & Status Badges */}
                       <div className="flex items-center justify-between gap-2">
                         <span className={`inline-flex items-center gap-1 text-[11px] font-extrabold px-2.5 py-0.5 rounded-full border ${
                           task.category === 'Cajera'

@@ -1,5 +1,5 @@
 -- ==============================================================================
--- SCHEMA SQL PARA SUPABASE: PAN DEL BARRIO - CHECKLIST POR ROLES (CAJERA Y DESPACHO)
+-- SCHEMA SQL PARA SUPABASE: PAN DEL BARRIO - CHECKLIST CAJERA Y DESPACHO (MAÑANA)
 -- Ejecutar en el SQL Editor de Supabase (https://app.supabase.com)
 -- ==============================================================================
 
@@ -214,13 +214,14 @@ DROP POLICY IF EXISTS "Permitir admin gestionar tareas" ON public.tasks;
 CREATE POLICY "Permitir admin gestionar tareas" ON public.tasks FOR ALL USING (true);
 
 -- ==============================================================================
--- INSERCIÓN DE TAREAS REORGANIZADAS POR ROLES (CAJERA Y DESPACHO)
+-- INSERCIÓN DE TAREAS: TURNO MAÑANA (18 CAJERA + 21 DESPACHO = 39 TAREAS)
+-- TURNO TARDE QUEDA VACÍO PARA QUE EL ADMINISTRADOR AGREGUE SUS TAREAS
 -- ==============================================================================
 TRUNCATE TABLE public.tasks CASCADE;
 
 INSERT INTO public.tasks (title, description, category, shift_id, display_order, active) VALUES
--- MAÑANA - CAJERA
-('Revisión de la temperatura de equipos y correcto funcionamiento', 'Verificar congeladoras, neveras y exhibidores.', 'Cajera', 'manana', 1, true),
+-- MAÑANA - CAJERA (18 Tareas)
+('Revisión de temperatura de equipos y correcto funcionamiento', 'Verificar congeladoras, neveras y exhibidores.', 'Cajera', 'manana', 1, true),
 ('Verificar fechas de vencimiento (moldes, hamburguesas, huevos, etc.)', 'Revisión de productos perecibles en stock.', 'Cajera', 'manana', 2, true),
 ('Verificar stock de ingredientes para la preparación de productos', 'Materia prima e insumos de la jornada.', 'Cajera', 'manana', 3, true),
 ('Verificar estado de los panes campesinos', 'Revisar frescura, textura y empaque.', 'Cajera', 'manana', 4, true),
@@ -229,7 +230,7 @@ INSERT INTO public.tasks (title, description, category, shift_id, display_order,
 ('Verificar e ingresar la producción', 'Registrar ingreso de producción.', 'Cajera', 'manana', 7, true),
 ('Limpieza de barras y mesas', 'Desinfectar superficies del salón.', 'Cajera', 'manana', 8, true),
 ('Limpieza de piso, baño', 'Barrido, trapeado de salón y aseo de baño.', 'Cajera', 'manana', 9, true),
-('Limpieza de horno, tostadora, microondas, vitrina, caja y estantes', 'Limpieza profunda de artefactos, mostrador y caja.', 'Cajera', 'manana', 10, true),
+('Limpieza de horno, tostadora y demás', 'Limpieza profunda de artefactos, microondas, vitrina, caja y estantes.', 'Cajera', 'manana', 10, true),
 ('Abastecer la cafetera (café, agua, leche, chocolate)', 'Llenado de contenedores de cafetera.', 'Cajera', 'manana', 11, true),
 ('Revisión y reposición de servilletas, cucharas, sorbetes, azúcar', 'Insumos de atención en caja y barra.', 'Cajera', 'manana', 12, true),
 ('Abastecer neveras y estantes (jugos, gaseosas, leches, tostadas)', 'Reposición de bebidas en frío y exhibidor.', 'Cajera', 'manana', 13, true),
@@ -239,7 +240,7 @@ INSERT INTO public.tasks (title, description, category, shift_id, display_order,
 ('Cuadre de caja, ingreso de venta a drive y cierre de sistema', 'Arqueo contable e informe de ventas en Drive.', 'Cajera', 'manana', 17, true),
 ('Informar al siguiente turno de algún pedido pendiente y/o si falta algo por terminar', 'Relevo entre cajeras.', 'Cajera', 'manana', 18, true),
 
--- MAÑANA - DESPACHO
+-- MAÑANA - DESPACHO (21 Tareas)
 ('Revisión de temperatura de las neveras y equipos', 'Comprobar refrigeración en área de despacho.', 'Despacho', 'manana', 19, true),
 ('Abastecer exhibidor de panes y colocar etiqueta de nombres', 'Organizar vitrina principal de panadería.', 'Despacho', 'manana', 20, true),
 ('Verificar fechas de vencimiento (moldes, hamburguesas, huevos, etc.)', 'Control de caducidad en insumos.', 'Despacho', 'manana', 21, true),
@@ -260,47 +261,7 @@ INSERT INTO public.tasks (title, description, category, shift_id, display_order,
 ('Dejar abastecido de detergente, lejía y poet', 'Productos de aseo.', 'Despacho', 'manana', 36, true),
 ('Dejar trapos y trapeadores limpios', 'Implementos de aseo higienizados.', 'Despacho', 'manana', 37, true),
 ('Limpiar rebanadora', 'Desinfección de rebanadora.', 'Despacho', 'manana', 38, true),
-('Informar al siguiente turno sobre cualquier pedido pendiente y/o si falta algo por terminar', 'Relevo entre personal de despacho.', 'Despacho', 'manana', 39, true),
-
--- TARDE - CAJERA
-('Revisión de la temperatura de equipos y correcto funcionamiento', 'Comprobar congeladores y vitrinas.', 'Cajera', 'tarde', 40, true),
-('Verificar fechas de vencimiento (moldes, hamburguesas, huevos, etc.)', 'Control de caducidades.', 'Cajera', 'tarde', 41, true),
-('Verificar stock de ingredientes para la preparación de productos', 'Revisar materia prima de tarde.', 'Cajera', 'tarde', 42, true),
-('Verificar las APPS (Cárkula, PedidosYa, Rappi)', 'Revisión de pedidos delivery.', 'Cajera', 'tarde', 43, true),
-('Verificar máquina de café (que esté abastecida: leche, café, chocolate y agua)', 'Insumos de cafetera.', 'Cajera', 'tarde', 44, true),
-('Verificar e ingresar producción de la tarde', 'Registro de producción.', 'Cajera', 'tarde', 45, true),
-('Limpieza de horno, tostadora, microondas, vitrina, caja y estantes', 'Aseo de zona de caja y artefactos.', 'Cajera', 'tarde', 46, true),
-('Abastecer cafetera (café, agua, leche, chocolate)', 'Llenado de máquina de café.', 'Cajera', 'tarde', 47, true),
-('Revisión y reposición de servilletas, cucharas, sorbetes, sobres azúcar', 'Insumos de mostrador.', 'Cajera', 'tarde', 48, true),
-('Abastecer neveras y estantes (jugos, gaseosas, leches, tostadas)', 'Reposición de frío.', 'Cajera', 'tarde', 49, true),
-('Dejar vitrina de postres abastecida (empanadas, alfajores y roskitas)', 'Exhibición de dulce.', 'Cajera', 'tarde', 50, true),
-('Colocar los postres con etiquetas de nombre y fecha', 'Etiquetado de caducidad.', 'Cajera', 'tarde', 51, true),
-('Colocar milhojas y pies en envases descartables y cubrir crema volteada', 'Protección de repostería.', 'Cajera', 'tarde', 52, true),
-('Lavar máquina de café', 'Limpieza y purgado de máquina expreso.', 'Cajera', 'tarde', 53, true),
-('Realizar el conteo de pastelería', 'Inventario final de pastelería.', 'Cajera', 'tarde', 54, true),
-('Cuadrar caja, ingreso de venta a drive y cierre de sistema', 'Arqueo de caja final e informe en Drive.', 'Cajera', 'tarde', 55, true),
-('Informar al siguiente turno de algún pedido pendiente y/o si falta algo por terminar', 'Novedades de cierre.', 'Cajera', 'tarde', 56, true),
-
--- TARDE - DESPACHO
-('Revisión de la temperatura de equipos y correcto funcionamiento', 'Control de frío en nocturno.', 'Despacho', 'tarde', 57, true),
-('Abastecer exhibidor de panes y colocar etiqueta de nombres', 'Organizar vitrina principal.', 'Despacho', 'tarde', 58, true),
-('Verificar estado de los panes campesinos', 'Frescura de pan campesino.', 'Despacho', 'tarde', 59, true),
-('Limpieza de barras, mesas y sillas', 'Aseo de salón.', 'Despacho', 'tarde', 60, true),
-('Limpieza de pisos, baño y zona de la cocina', 'Barrido, trapeado y desinfección total.', 'Despacho', 'tarde', 61, true),
-('Corte y empaquetado de pan de molde / hamburguesas / pullman / tostadas / roskitas', 'Empacado de panes.', 'Despacho', 'tarde', 62, true),
-('Guardar campesinos nuevos en el taper grande', 'Almacenamiento higiénico.', 'Despacho', 'tarde', 63, true),
-('Lavar máquina de naranjas', 'Desarmado y lavado de exprimidor industrial.', 'Despacho', 'tarde', 64, true),
-('Limpiar rebanadora', 'Higiene de rebanadora.', 'Despacho', 'tarde', 65, true),
-('Realizar el conteo de panadería', 'Inventario final de panadería.', 'Despacho', 'tarde', 66, true),
-('Embolsar correctamente los productos de la vitrina de panadería', 'Protección de conservación.', 'Despacho', 'tarde', 67, true),
-('Dejar moldes de embutidos bien tapados y sin exceso de envoltura', 'Almacenamiento en frío.', 'Despacho', 'tarde', 68, true),
-('Meter sillas y mesas; dejar limpio el piso de la terraza', 'Resguardo de muebles.', 'Despacho', 'tarde', 69, true),
-('Dejar vitrina limpia y vacía (limpiar con limpiavidrios y periódico)', 'Limpieza de cristales.', 'Despacho', 'tarde', 70, true),
-('Solicitar insumos necesarios para el día siguiente', 'Anotar pedidos.', 'Despacho', 'tarde', 71, true),
-('Dejar abastecido de detergente, lejía y poet', 'Reposición de insumos de aseo.', 'Despacho', 'tarde', 72, true),
-('Dejar trapos, trapeador y lavadero limpio', 'Higiene de área de aseo.', 'Despacho', 'tarde', 73, true),
-('Sacar la basura (salón, producción, baños)', 'Retiro de bolsas de basura.', 'Despacho', 'tarde', 74, true),
-('Informar al siguiente turno de algún pedido pendiente y/o si falta algo por terminar', 'Novedades de cierre.', 'Despacho', 'tarde', 75, true);
+('Informar sobre cualquier pedido pendiente y/o si falta algo por terminar', 'Relevo entre personal de despacho.', 'Despacho', 'manana', 39, true);
 
 -- Crear logs para el día actual
 INSERT INTO public.daily_task_logs (log_date, task_id, status)

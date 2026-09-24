@@ -21,14 +21,14 @@ export const getTodayString = () => {
 };
 
 // Storage keys for local fallback engine
-const LOCAL_TASKS_KEY = 'pan_del_barrio_tasks_v5';
-const LOCAL_HISTORY_KEY = 'pan_del_barrio_history_v5';
+const LOCAL_TASKS_KEY = 'pan_del_barrio_tasks_v6';
+const LOCAL_HISTORY_KEY = 'pan_del_barrio_history_v6';
 const LAST_RESET_DATE_KEY = 'pan_del_barrio_last_reset_tag';
 
 // Initial local storage setup
 export const initLocalStorage = () => {
   const existing = localStorage.getItem(LOCAL_TASKS_KEY);
-  if (!existing || JSON.parse(existing).length < 20 || !JSON.parse(existing)[0].category.includes('Cajera')) {
+  if (!existing || JSON.parse(existing).length !== INITIAL_TASKS.length) {
     localStorage.setItem(LOCAL_TASKS_KEY, JSON.stringify(INITIAL_TASKS));
   }
 
@@ -39,13 +39,13 @@ export const initLocalStorage = () => {
       {
         id: 'hist-1',
         snapshot_date: yesterday.toISOString().split('T')[0],
-        total_tasks: 75,
-        completed_tasks: 72,
-        pending_tasks: 3,
-        completion_percentage: 96,
-        morning_completion_pct: 98,
-        afternoon_completion_pct: 94,
-        summary_notes: 'Jornada oficial completada a las 22:00h.'
+        total_tasks: 39,
+        completed_tasks: 37,
+        pending_tasks: 2,
+        completion_percentage: 95,
+        morning_completion_pct: 95,
+        afternoon_completion_pct: 0,
+        summary_notes: 'Jornada Mañana completada a las 22:00h.'
       }
     ];
     localStorage.setItem(LOCAL_HISTORY_KEY, JSON.stringify(mockHistory));
@@ -79,7 +79,7 @@ export const fetchTasks = async () => {
         .eq('active', true)
         .order('display_order', { ascending: true });
 
-      if (!error && dbTasks && dbTasks.length > 0) {
+      if (!error && dbTasks) {
         const { data: logs } = await supabase
           .from('daily_task_logs')
           .select('*')

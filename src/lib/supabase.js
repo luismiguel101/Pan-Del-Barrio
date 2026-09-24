@@ -21,14 +21,14 @@ export const getTodayString = () => {
 };
 
 // Storage keys for local fallback engine
-const LOCAL_TASKS_KEY = 'pan_del_barrio_tasks_v6';
-const LOCAL_HISTORY_KEY = 'pan_del_barrio_history_v6';
+const LOCAL_TASKS_KEY = 'pan_del_barrio_tasks_v7';
+const LOCAL_HISTORY_KEY = 'pan_del_barrio_history_v7';
 const LAST_RESET_DATE_KEY = 'pan_del_barrio_last_reset_tag';
 
 // Initial local storage setup
 export const initLocalStorage = () => {
   const existing = localStorage.getItem(LOCAL_TASKS_KEY);
-  if (!existing || JSON.parse(existing).length !== INITIAL_TASKS.length) {
+  if (!existing || JSON.parse(existing).length === 0 || !JSON.parse(existing)[0].category || !['Cajera', 'Despacho'].includes(JSON.parse(existing)[0].category)) {
     localStorage.setItem(LOCAL_TASKS_KEY, JSON.stringify(INITIAL_TASKS));
   }
 
@@ -68,7 +68,7 @@ export const checkAutoDailyReset = () => {
   }
 };
 
-// FETCH TASKS
+// FETCH TASKS (Con auto-poblado inteligente en Supabase si está vacío)
 export const fetchTasks = async () => {
   if (supabase) {
     try {
@@ -80,26 +80,67 @@ export const fetchTasks = async () => {
         .order('display_order', { ascending: true });
 
       if (!error && dbTasks) {
-        const { data: logs } = await supabase
-          .from('daily_task_logs')
-          .select('*')
-          .eq('log_date', today);
-
-        return dbTasks.map(t => {
-          const log = logs?.find(l => l.task_id === t.id);
-          return {
-            id: t.id,
+        // Si Supabase está conectado pero no tiene tareas, las insertamos automáticamente
+        if (dbTasks.length === 0) {
+          console.log('🌱 Sembrando 39 tareas de Mañana (Cajera y Despacho) en Supabase...');
+          const tasksToInsert = INITIAL_TASKS.map(t => ({
             title: t.title,
-            description: t.description || '',
-            category: t.category || 'Cajera',
-            shift: t.shift_id,
-            order: t.display_order,
-            active: t.active,
-            status: log ? log.status : 'pendiente',
-            completedAt: log?.completed_at || null,
-            completedBy: log?.completed_by_name || null
-          };
-        });
+            description: t.description,
+            category: t.category,
+            shift_id: t.shift,
+            display_order: t.order,
+            active: true
+          }));
+
+          const { data: inserted, error: insertError } = await supabase
+            .from('tasks')
+            .insert(tasksToInsert)
+            .select();
+
+          if (!insertError && inserted && inserted.length > 0) {
+            const logsToInsert = inserted.map(t => ({
+              log_date: today,
+              task_id: t.id,
+              status: 'pendiente'
+            }));
+            await supabase.from('daily_task_logs').insert(logsToInsert);
+
+            return inserted.map(t => ({
+              id: t.id,
+              title: t.title,
+              description: t.description || '',
+              category: t.category,
+              shift: t.shift_id,
+              order: t.display_order,
+              active: true,
+              status: 'pendiente',
+              completedAt: null,
+              completedBy: null
+            }));
+          }
+        } else {
+          // Obtener los logs del día de hoy
+          const { data: logs } = await supabase
+            .from('daily_task_logs')
+            .select('*')
+            .eq('log_date', today);
+
+          return dbTasks.map(t => {
+            const log = logs?.find(l => l.task_id === t.id);
+            return {
+              id: t.id,
+              title: t.title,
+              description: t.description || '',
+              category: t.category || 'Cajera',
+              shift: t.shift_id,
+              order: t.display_order,
+              active: t.active,
+              status: log ? log.status : 'pendiente',
+              completedAt: log?.completed_at || null,
+              completedBy: log?.completed_by_name || null
+            };
+          });
+        }
       }
     } catch (err) {
       console.warn('Error conectando a Supabase, usando local storage:', err);
@@ -157,7 +198,7 @@ export const toggleTaskStatus = async (taskId, currentStatus) => {
   return { success: true, newStatus, tasks: updated };
 };
 
-// CREATE / EDIT TASK
+// CREATE / EDIT TASK (Permite al Admin crear tareas para Cajera o Despacho en Mañana o Tarde)
 export const saveTask = async (taskData) => {
   if (supabase) {
     try {
@@ -187,7 +228,16 @@ export const saveTask = async (taskData) => {
             active: true
           })
           .select();
-        if (!error) return { success: true, data };
+
+        if (!error && data && data.length > 0) {
+          const today = getTodayString();
+          await supabase.from('daily_task_logs').insert({
+            log_date: today,
+            task_id: data[0].id,
+            status: 'pendiente'
+          });
+          return { success: true, data };
+        }
       }
     } catch (err) {
       console.warn('Error al guardar en Supabase, guardando local:', err);
